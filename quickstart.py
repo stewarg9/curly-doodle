@@ -61,6 +61,8 @@ def get_credentials():
 	
 def download_file(service, item_dict):
 
+	print(config_data)
+
 	target_dir = config_data.get('download_dir')
 	
 	# Validation... 
@@ -87,10 +89,10 @@ def download_file(service, item_dict):
 	year = create_date[0:4]	
 	
 	
-	if app_config.get(dir_structure) == None:
+	if config_data.get("dir_structure") == None:
 		raise RuntimeError('Directory Structure not specified in config file.')
 		
-	elif app_config.get(dir_structure) == 'Y/M/D':
+	elif config_data.get("dir_structure") == 'Y/M/D':
 	
 		if not os.path.isdir(target_dir + '/' + year):
 			os.mkdir(target_dir + '/' + year)
@@ -103,7 +105,7 @@ def download_file(service, item_dict):
 	
 		target_path = target_dir + '/' + year + '/' + month + '/' + day
 	
-	elif app_config['dir_structure'] == 'YMD':
+	elif config_data.get('dir_structure') == 'YMD':
 		
 		targetpath = target_dir + '/' + year +  month + day
 	
@@ -145,7 +147,7 @@ def retrieve_all_files(api_service):
 				break
 
 		except errors.HttpError as error:
-			print(f'An error has occurred: {error}')
+			print('An error has occurred:', error)
 			break
 
 
@@ -199,7 +201,7 @@ def search_date_range(service):
 				break
 
 		except errors.HttpError as error:
-			print(f'An error has occurred: {error}')
+			print('An error has occurred:', error)
 			break
 
 	print("Yo!")
@@ -223,6 +225,7 @@ def search_date_range(service):
 
 def main():
 
+	global config_data
 
 	# Look for the pre-configured search query....
 	with open(CONFIG_DIR + "/app_config.json") as json_data_file:
