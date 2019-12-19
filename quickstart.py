@@ -75,8 +75,17 @@ def download_file(service, item_dict):
 	
 	filename = item_dict['filename']
 	base_url = item_dict['baseUrl']
+	mimeType = item_dict['mimeType']
 
-	download_url = base_url + '=d'#-w' + orig_width + '-h' + orig_height
+	if 'image' in mimeType:
+
+		download_url = base_url + '=d'#-w' + orig_width + '-h' + orig_height
+	elif 'video' in mimeType:
+
+		download_url = base_url + '=dv'
+
+	else:
+		return
 
 	print('Downloading ', filename, ' (', download_url, ')...')
 
