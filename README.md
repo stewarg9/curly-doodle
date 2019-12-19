@@ -20,3 +20,9 @@ Google API Python client
   
 Google auth OAuth Lib
   pip3 install google-auth-oauthlib
+
+
+
+Upload code adapted from here:
+  https://github.com/eshmu/gphotos-upload/blob/master/upload.py
+  
