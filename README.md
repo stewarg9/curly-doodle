@@ -7,3 +7,16 @@ Link to the Discovery API Documentation:
   
 Link to API documentation:
   https://developers.google.com/photos/library/reference/rest
+
+
+Python basics: 
+install pip
+  sudo apt-get install python3-pip python3-setuptools build-essential
+
+Depends on the following modules: 
+
+Google API Python client
+  pip3 install google-api-python-client
+  
+Google auth OAuth Lib
+  pip3 install google-auth-oauthlib
