@@ -1,0 +1,21 @@
+{
+    "filters": {
+        "dateFilter": {
+            "ranges": [
+                {
+                    "endDate": {
+                        "day": 31,
+                        "month": 12,
+                        "year": 2019
+                    },
+                    "startDate": {
+                        "day": 1,
+                        "month": 1,
+                        "year": 2019
+                    }
+                }
+            ]
+        }
+    },
+    "pageSize": 25
+}
