@@ -22,6 +22,9 @@ Google auth OAuth Lib
   pip3 install google-auth-oauthlib
 
 
+Deployment
+  git clone https://github.com/stewarg9/curly-doodle
+
 
 Upload code adapted from here:
   https://github.com/eshmu/gphotos-upload/blob/master/upload.py
