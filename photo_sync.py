@@ -87,7 +87,7 @@ def download_file(service, item_dict):
 	else:
 		return
 
-	print('Downloading ', filename, ' (', download_url, ')...')
+	#print('Downloading ', filename, ' (', download_url, ')...')
 
 	response = requests.get(download_url, stream=True)
 		
