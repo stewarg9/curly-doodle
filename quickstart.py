@@ -124,7 +124,7 @@ def download_file(service, item_dict):
 	
 	
 	with open(target_path + '/' + filename, 'wb') as out_file:
-		print(response.raw)
+		# print(response.raw)
 		shutil.copyfileobj(response.raw, out_file)	
 
 
@@ -155,7 +155,7 @@ def retrieve_all_files(api_service):
 			if not page_token:
 				break
 
-		except errors.HttpError as error:
+		except Exception as error:
 			print('An error has occurred:', error)
 			break
 
@@ -209,7 +209,7 @@ def search_date_range(service):
 			if not page_token:
 				break
 
-		except errors.HttpError as error:
+		except Exception as error:
 			print('An error has occurred:', error)
 			break
 
