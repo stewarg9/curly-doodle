@@ -67,7 +67,7 @@ def get_credentials():
 	
 def download_file(service, item_dict):
 
-	print(config_data)
+	#print(config_data)
 
 	target_dir = config_data.get('download_dir')
 	
@@ -93,7 +93,7 @@ def download_file(service, item_dict):
 	else:
 		return
 
-	#print('Downloading ', filename, ' (', download_url, ')...')
+	print('Downloading ', filename, item_dict['mediaMetadata']['creationTime'][0:10])# , ' (', download_url, ')...')
 
 	response = requests.get(download_url, stream=True)
 		
@@ -137,41 +137,6 @@ def download_file(service, item_dict):
 
 
 
-
-# List all files in photo library.
-def retrieve_all_files(api_service):
-	results = []
-	page_token = None
-
-	while True:
-		try:
-			param = {'pageSize':'10', 'fields':"nextPageToken,mediaItems(id,mediaMetadata,filename,base_url,productUrl)"}
-
-			if page_token:
-				param['pageToken'] = page_token
-
-			files = api_service.mediaItems().list(**param).execute()
-			
-			# append the files from the current result page to our list
-			results.extend(files.get('mediaItems'))
-
-			# Google  API shows our items in multiple pages when the number of files exceed 100
-			page_token = files.get('nextPageToken')
-
-			if not page_token:
-				break
-
-		except Exception as error:
-			print('An error has occurred:', error)
-			break
-
-
-	return results
-
-
-
-
-
 # Build a formatted date dictionary for the search query. 
 def date_to_dict(the_date):
 	
@@ -203,26 +168,47 @@ def date_to_dict(the_date):
 #    },
 #    "pageSize": 25
 #}	
-def build_filter(start_date, end_date, page_size = 25):
+#~ def build_filter(start_date, end_date, page_size = 250):
 	
-	start_date_dict = date_to_dict(start_date)
-	end_date_dict = date_to_dict(end_date)
+	#~ start_date_dict = date_to_dict(start_date)
+	#~ end_date_dict = date_to_dict(end_date)
+		
+	#~ search_dict = {}
 	
+	#~ search_dict["filters"] = {}
+	#~ search_dict["filters"]["dateFilter"] = {}
+	#~ search_dict["filters"]["dateFilter"]["ranges"] = []
+
+	#~ search_hash = {"endDate" : end_date_dict, "startDate" : start_date_dict } 
 	
+	#~ search_dict["filters"]["dateFilter"]["ranges"].append(search_hash)
+	
+	#~ search_dict["pageSize"] = page_size
+	
+	#~ print(search_dict)
+
+
+
+def build_filter(date, page_size = 100):
+	
+	date_dict = date_to_dict(date)
+		
 	search_dict = {}
 	
 	search_dict["filters"] = {}
 	search_dict["filters"]["dateFilter"] = {}
-	search_dict["filters"]["dateFilter"]["ranges"] = []
+	search_dict["filters"]["dateFilter"]["dates"] = []
 
-	search_hash = {"endDate" : end_date_dict, "startDate" : start_date_dict } 
 	
-	search_dict["filters"]["dateFilter"]["ranges"].append(search_hash)
+	
+	search_dict["filters"]["dateFilter"]["dates"].append(date_dict)
 	
 	search_dict["pageSize"] = page_size
-	
-	#pprint.pprint(search_dict)
 
+	#print(search_dict)
+	
+	return search_dict
+	
 
 
 
@@ -230,7 +216,6 @@ def build_filter(start_date, end_date, page_size = 25):
 # Search the Google Photo Library, using a pre-configured data filter. 
 # Filter exists as a separate JSON file. 
 def search_date_range(service):
-
 
 	# Read the last sync date from the config file; use this as the start date. 
 	last_sync_date_parts = config_data["last_sync_date"].split("-")
@@ -240,60 +225,73 @@ def search_date_range(service):
 	day = timedelta(days=1)
 	end_date = date.today() - day
 
-	# Build the filter object, including date range. 
-	filter = build_filter(start_date, end_date)
-
 	results = list()
-	page_token = None
 
-	while True:
-		try:
+	while start_date < end_date:
 
-			if page_token:
-				filter['pageToken'] = page_token
+		print("start date: ", start_date, " end date:", start_date + day)
 
-			picture_page = service.mediaItems().search(body=filter).execute()
+		# Build the filter object, including date range. 
+		filter = build_filter(start_date)
+		
+		page_token = None
 
-			items = picture_page.get('mediaItems', [])
-			if not items:
-				print('No albums found.')
-			else:
+		while True:
+			try:
+
+				if page_token:
+					filter['pageToken'] = page_token
+
+				picture_page = service.mediaItems().search(body=filter).execute()
+
+				items = picture_page.get('mediaItems', [])
 				
-				
-				#print('Items:')
-				
-				for item in items:
+				if not items:
+					print('No items found.')
 					
-					create_date= item['mediaMetadata']['creationTime'][0:10]
+				else:
 					
-					print(create_date)
+					print ("Found ", len(items), " items!")
 					
-					results.append(create_date)
-					download_file(service, item)	
+					for item in items:
+						
+						create_date= item['mediaMetadata']['creationTime'][0:10]
+						
+						#print(create_date)
+						
+						results.append(create_date)
+						download_file(service, item)	
 
 
-			# Google  API shows our items in multiple pages when the number of files exceed page sizein json file
-			page_token = picture_page.get('nextPageToken')
+				# Google  API shows our items in multiple pages when the number of files exceed page sizein json file
+				page_token = picture_page.get('nextPageToken')
 
-			print(max(results))
+				if not page_token:
+					break
 
-			if not page_token:
+			except Exception as error:
+				print('An error has occurred:', error)				
+				if item is not None: 
+					print('File name: ', item['filename'])
 				break
 
-		except Exception as error:
-			print('An error has occurred:', error)
-			break
+		# Increment the start date and reset. 
+		start_date += day
+		results = list(set(results))
+
 
 	print("Yo!")
-	print(results)
 	if len(results) > 0:
 		
+		# Show the list of dates we've returned photos for. 
+		print(results)
+
 		# Update the config file to reflect the "new" sync date.... 
 		config_data["last_sync_date"] = end_date.isoformat()
 		
 		# Save the last sync date back to the master config file. 
 		with open(CONFIG_DIR + "/app_config.json", "w") as json_data_file:
-			json.dump(filter, json_data_file, indent=4, sort_keys=True)		
+			json.dump(config_data, json_data_file, indent=4, sort_keys=True)		
 			
 			
 
@@ -419,13 +417,40 @@ def main():
 
 	global config_data
 
+	if not os.path.isfile(CONFIG_DIR + "/app_config.json"):
+		print("Error: config file (" + CONFIG_DIR + "/app_config.json) not found. ")
+		print("creating template config file...")
+		create_config_file()
+		exit()
+		
+
 	# Look for the pre-configured search query....
 	with open(CONFIG_DIR + "/app_config.json") as json_data_file:
 		config_data = json.load(json_data_file)	
 
+	print("Using config:", config_data)
+
 	service = get_service()
 
 	search_date_range(service)
+
+
+
+
+# If the app config file doesn't exist, create a sample one, for the user to complete... 
+def create_config_file():
+	
+	config_data = dict()
+	
+	config_data["credentials_file"] = "/path/to/file"
+	config_data["download_dir"] = "/path/to/dir"
+	config_data["dir_structure"] = "Y/M/D"
+	config_data["last_sync_date"] = "2010-01-01"
+	
+	# Save the last sync date back to the master config file. 
+	with open(CONFIG_DIR + "/app_config.json", "w") as json_data_file:
+		json.dump(config_data, json_data_file, indent=4, sort_keys=True)		
+
 
 
 
