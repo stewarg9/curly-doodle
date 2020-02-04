@@ -9,6 +9,12 @@ import shutil
 import json
 
 
+from datetime import date
+from datetime import timedelta
+
+#import pprint
+
+
 # This access scope grants read-only access to the authenticated user's Photo Library
 SCOPES = ['https://www.googleapis.com/auth/photoslibrary.readonly']
 API_SERVICE_NAME = 'photoslibrary'
@@ -164,13 +170,78 @@ def retrieve_all_files(api_service):
 
 
 
+
+
+# Build a formatted date dictionary for the search query. 
+def date_to_dict(the_date):
+	
+	#print(the_date)
+	
+	the_dict = dict()
+	the_dict["day"] = the_date.day
+	the_dict["month"] = the_date.month
+	the_dict["year"] = the_date.year
+
+	return the_dict
+
+
+
+
+# Build a filter object, for the search. 
+# 
+# Format: 
+#{
+#    "filters": {
+#        "dateFilter": {
+#            "ranges": [
+#                {
+#                    "endDate": {"day": 31, "month": 12,"year": 2019},
+#                    "startDate": {"day": 1,"month": 1, "year": 2019}
+#                }
+#            ]
+#        }
+#    },
+#    "pageSize": 25
+#}	
+def build_filter(start_date, end_date, page_size = 25):
+	
+	start_date_dict = date_to_dict(start_date)
+	end_date_dict = date_to_dict(end_date)
+	
+	
+	search_dict = {}
+	
+	search_dict["filters"] = {}
+	search_dict["filters"]["dateFilter"] = {}
+	search_dict["filters"]["dateFilter"]["ranges"] = []
+
+	search_hash = {"endDate" : end_date_dict, "startDate" : start_date_dict } 
+	
+	search_dict["filters"]["dateFilter"]["ranges"].append(search_hash)
+	
+	search_dict["pageSize"] = page_size
+	
+	#pprint.pprint(search_dict)
+
+
+
+
+
 # Search the Google Photo Library, using a pre-configured data filter. 
 # Filter exists as a separate JSON file. 
 def search_date_range(service):
 
-	# Look for the pre-configured search query....
-	with open(CONFIG_DIR + "/search_message_body.json") as json_data_file:
-		filter = json.load(json_data_file)	
+
+	# Read the last sync date from the config file; use this as the start date. 
+	last_sync_date_parts = config_data["last_sync_date"].split("-")
+	start_date = date(int(last_sync_date_parts[0]), int(last_sync_date_parts[1]), int(last_sync_date_parts[2]))
+
+	# Single day offset... 
+	day = timedelta(days=1)
+	end_date = date.today() - day
+
+	# Build the filter object, including date range. 
+	filter = build_filter(start_date, end_date)
 
 	results = list()
 	page_token = None
@@ -216,23 +287,20 @@ def search_date_range(service):
 	print("Yo!")
 	print(results)
 	if len(results) > 0:
-
-		# We've processed something- update the start date to reflect what we've processed. 
-
-		max_date = max(results)
-
-		new_date = {'day' : int(max_date[8:10]), 'month' : int(max_date[5:7]), 'year' : int(max_date[0:4]) }
 		
-		filter['filters']['dateFilter']['ranges'][0]['startDate'] = new_date
+		# Update the config file to reflect the "new" sync date.... 
+		config_data["last_sync_date"] = end_date.isoformat()
 		
-		# Look for the pre-configured search query....
-		with open(CONFIG_DIR + "/search_message_body.json", "w") as json_data_file:
+		# Save the last sync date back to the master config file. 
+		with open(CONFIG_DIR + "/app_config.json", "w") as json_data_file:
 			json.dump(filter, json_data_file, indent=4, sort_keys=True)		
-
-
 			
-			# Generator to loop through all albums
+			
 
+
+
+
+# Generator to loop through all albums
 def getAlbums(session, appCreatedOnly=False):
 
     params = {
@@ -258,6 +326,10 @@ def getAlbums(session, appCreatedOnly=False):
         else:
             return
 
+
+
+
+
 def create_or_retrieve_album(session, album_title):
 
 # Find albums created by this app to see if one matches album_title
@@ -282,6 +354,11 @@ def create_or_retrieve_album(session, album_title):
     else:
         logging.error("Could not find or create photo album '\{0}\'. Server Response: {1}".format(album_title, resp))
         return None
+
+
+
+
+
 
 def upload_photos(session, photo_file_list, album_name):
 
@@ -339,6 +416,7 @@ def upload_photos(session, photo_file_list, album_name):
 
 def main():
 
+
 	global config_data
 
 	# Look for the pre-configured search query....
@@ -348,7 +426,6 @@ def main():
 	service = get_service()
 
 	search_date_range(service)
-
 
 
 
