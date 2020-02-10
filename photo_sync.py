@@ -1,3 +1,5 @@
+#!/home/osmc/envs/google/bin/python3
+
 from __future__ import print_function
 import pickle
 import requests
@@ -286,8 +288,14 @@ def search_date_range(service):
 		# Show the list of dates we've returned photos for. 
 		print(results)
 
+
+		max_val = max(results)
+		max_val_parts = max_val.split('-')
+
+		max_date = date(int(max_val_parts[0]), int(max_val_parts[1]), int(max_val_parts[2]))
+
 		# Update the config file to reflect the "new" sync date.... 
-		config_data["last_sync_date"] = end_date.isoformat()
+		config_data["last_sync_date"] = max_date.isoformat()
 		
 		# Save the last sync date back to the master config file. 
 		with open(CONFIG_DIR + "/app_config.json", "w") as json_data_file:
