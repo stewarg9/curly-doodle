@@ -16,7 +16,7 @@ from datetime import timedelta
 
 #import pprint
 
-from sleepingbunny.GoogleMail import GoogleMail
+from sleepingbunny.GoogleMail import GoogleMail as gm
 
 
 class GooglePhotos:
@@ -58,7 +58,7 @@ class GooglePhotos:
 		
 		self.get_service()
 
-
+		self.processed_file_list = list()
 
 		
 	def get_service(self):
@@ -125,7 +125,9 @@ class GooglePhotos:
 			return
 
 		print('Downloading ', filename, item_dict['mediaMetadata']['creationTime'][0:10])# , ' (', download_url, ')...')
-
+		
+		self.processed_file_list.append('Downloading ', filename, item_dict['mediaMetadata']['creationTime'][0:10])# , ' (', download_url, ')...')
+		
 		response = requests.get(download_url, stream=True)
 			
 		create_date= item_dict['mediaMetadata']['creationTime'][0:10]
@@ -315,7 +317,6 @@ class GooglePhotos:
 			# Show the list of dates we've returned photos for. 
 			print(results)
 
-
 			max_val = max(results)
 			max_val_parts = max_val.split('-')
 
@@ -328,6 +329,12 @@ class GooglePhotos:
 			with open(self.config_file, "w") as json_data_file:
 				json.dump(self.config_data, json_data_file, indent=4, sort_keys=True)		
 
+
+			mailer = gm.GoogleMail()
+
+			msg = mailer.create_message('stewarg9@yahoo.co.uk',"Test Email",("\n").join(self.processed_file_list))			
+			
+			mailer.send_message(msg, user_id = 'me')			
 
 
 
