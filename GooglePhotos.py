@@ -25,22 +25,27 @@ class GooglePhotos:
 	API_SERVICE_NAME = 'photoslibrary'
 	API_VERSION = 'v1'
 
-	CONFIG_DIR = 'config/'
-	CONFIG_FILE = 'app_config.json'
+	CONFIG_DIR_NAME = 'config'
+	CONFIG_FILE_NAME = 'app_config.json'
 
+	
 
 	def __init__(self):
 
+		main_base = os.path.dirname(__file__)
+		self.config_dir = os.path.join(main_base, self.CONFIG_DIR_NAME)
+		self.config_file = os.path.join(main_base, self.CONFIG_DIR_NAME, self.CONFIG_FILE_NAME)		
+		
 		# check for config file... 
-		if not os.path.isfile(self.CONFIG_DIR + "/app_config.json"):
-			print("Error: config file (" + self.CONFIG_DIR + "/app_config.json) not found. ")
+		if not os.path.isfile(self.config_file):
+			print("Error: config file (" + self.config_file + ") not found. ")
 			print("creating template config file...")
 			self.create_config_file()
 			exit()
 			
 
 		# Look for the pre-configured search query....
-		with open(self.CONFIG_DIR + "/app_config.json") as json_data_file:
+		with open(self.config_file) as json_data_file:
 			self.config_data = json.load(json_data_file)	
 
 		print("Using config:", self.config_data)		
@@ -67,19 +72,19 @@ class GooglePhotos:
 
 		self.creds = None
 
-		if os.path.exists(self.CONFIG_DIR + 'token.pickle'):
-			with open(self.CONFIG_DIR + 'token.pickle', 'rb') as token:
+		if os.path.exists(self.config_dir + 'token.pickle'):
+			with open(self.config_dir + 'token.pickle', 'rb') as token:
 				self.creds = pickle.load(token)
 			# If there are no (valid) credentials available, let the user log in.
 		if not self.creds or not self.creds.valid:
 			if self.creds and self.creds.expired and self.creds.refresh_token:
 				self.creds.refresh(Request())
 			else:
-				flow = InstalledAppFlow.from_client_secrets_file(self.CONFIG_DIR + self.config_data['credentials_file'], SCOPES)
+				flow = InstalledAppFlow.from_client_secrets_file(self.config_dir + self.config_data['credentials_file'], SCOPES)
 				self.creds = flow.run_console()
 		
 		# Save the credentials for the next run
-		with open(self.CONFIG_DIR + 'token.pickle', 'wb') as token:
+		with open(self.config_dir + 'token.pickle', 'wb') as token:
 			pickle.dump(self.creds, token)
 
 
@@ -314,7 +319,7 @@ class GooglePhotos:
 			self.config_data["last_sync_date"] = max_date.isoformat()
 			
 			# Save the last sync date back to the master config file. 
-			with open(self.CONFIG_DIR + "/app_config.json", "w") as json_data_file:
+			with open(self.config_file, "w") as json_data_file:
 				json.dump(self.config_data, json_data_file, indent=4, sort_keys=True)		
 
 
@@ -331,12 +336,10 @@ class GooglePhotos:
 		config_data["last_sync_date"] = "2010-01-01"
 		
 		# Save the last sync date back to the master config file. 
-		with open(self.CONFIG_DIR + "/app_config.json", "w") as json_data_file:
+		with open(self.config_file, "w") as json_data_file:
 			json.dump(config_data, json_data_file, indent=4, sort_keys=True)		
 
 
-
-				
 				
 def main():
 
