@@ -16,6 +16,8 @@ from datetime import timedelta
 
 #import pprint
 
+from sleepingbunny.GoogleMail import GoogleMail
+
 
 class GooglePhotos:
 
@@ -92,7 +94,7 @@ class GooglePhotos:
 		
 	def download_file(self, item_dict):
 
-		print(self.config_data)
+		#print(self.config_data)
 
 		target_dir = self.config_data.get('download_dir')
 		
