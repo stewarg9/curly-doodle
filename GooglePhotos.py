@@ -264,7 +264,7 @@ class GooglePhotos:
 		while start_date < end_date:
 
 			print("start date: ", start_date, " end date:", start_date + day)
-			self.processed_file_list.append('start date: ' + start_date + '; end date: ' + (start_date + day).isoformat())
+			self.processed_file_list.append('start date: ' + start_date.isoformat() + '; end date: ' + (start_date + day).isoformat())
 			
 			
 			# Build the filter object, including date range. 
