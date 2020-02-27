@@ -82,7 +82,7 @@ class GooglePhotos:
 			if self.creds and self.creds.expired and self.creds.refresh_token:
 				self.creds.refresh(Request())
 			else:
-				flow = InstalledAppFlow.from_client_secrets_file(self.config_dir + self.config_data['credentials_file'], SCOPES)
+				flow = InstalledAppFlow.from_client_secrets_file(self.config_dir + self.config_data['credentials_file'], self.SCOPES)
 				self.creds = flow.run_console()
 		
 		# Save the credentials for the next run
