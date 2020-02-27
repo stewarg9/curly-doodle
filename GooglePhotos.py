@@ -126,7 +126,7 @@ class GooglePhotos:
 
 		print('Downloading ', filename, item_dict['mediaMetadata']['creationTime'][0:10])# , ' (', download_url, ')...')
 		
-		self.processed_file_list.append('Downloading ', filename, item_dict['mediaMetadata']['creationTime'][0:10])# , ' (', download_url, ')...')
+		self.processed_file_list.append('Downloading ' + filename + " " + item_dict['mediaMetadata']['creationTime'][0:10])  #+ ' (' + download_url + ')...')
 		
 		response = requests.get(download_url, stream=True)
 			
@@ -248,6 +248,9 @@ class GooglePhotos:
 	# Filter exists as a separate JSON file. 
 	def search_date_range(self):
 
+		self.processed_file_list.append('last sync date: ' + self.config_data['last_sync_date'])
+		
+		
 		# Read the last sync date from the config file; use this as the start date. 
 		last_sync_date_parts = self.config_data["last_sync_date"].split("-")
 		start_date = date(int(last_sync_date_parts[0]), int(last_sync_date_parts[1]), int(last_sync_date_parts[2]))
@@ -261,7 +264,9 @@ class GooglePhotos:
 		while start_date < end_date:
 
 			print("start date: ", start_date, " end date:", start_date + day)
-
+			self.processed_file_list.append('start date: ' + start_date + "; end date: ' + end_date)
+			
+			
 			# Build the filter object, including date range. 
 			filter = self.build_filter(start_date)
 			
@@ -317,6 +322,8 @@ class GooglePhotos:
 			# Show the list of dates we've returned photos for. 
 			print(results)
 
+			self.processed_file_list.append('new max date: ' + max(results))
+							
 			max_val = max(results)
 			max_val_parts = max_val.split('-')
 
