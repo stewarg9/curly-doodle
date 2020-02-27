@@ -29,6 +29,7 @@ class GooglePhotos:
 
 	CONFIG_DIR_NAME = 'config'
 	CONFIG_FILE_NAME = 'app_config.json'
+	TOKEN_FILE_NAME = 'token.pickle'
 
 	
 
@@ -36,8 +37,8 @@ class GooglePhotos:
 
 		main_base = os.path.dirname(__file__)
 		self.config_dir = os.path.join(main_base, self.CONFIG_DIR_NAME)
-		self.config_file = os.path.join(main_base, self.CONFIG_DIR_NAME, self.CONFIG_FILE_NAME)		
-		
+		self.config_file = os.path.join(main_base, self.CONFIG_DIR_NAME, self.CONFIG_FILE_NAME)	
+				
 		# check for config file... 
 		if not os.path.isfile(self.config_file):
 			print("Error: config file (" + self.config_file + ") not found. ")
@@ -52,6 +53,9 @@ class GooglePhotos:
 
 		print("Using config:", self.config_data)		
 
+		self.token_file = os.path.join(main_base, self.CONFIG_DIR_NAME, self.TOKEN_FILE_NAME)			
+		self.credentials_file = os.path.join(self.config_dir, self.config_data['credentials_file'])		
+		
 		self.get_service()
 
 
@@ -74,19 +78,19 @@ class GooglePhotos:
 
 		self.creds = None
 
-		if os.path.exists(self.config_dir + 'token.pickle'):
-			with open(self.config_dir + 'token.pickle', 'rb') as token:
+		if os.path.exists(self.token_file):
+			with open(self.token_file, 'rb') as token:
 				self.creds = pickle.load(token)
 			# If there are no (valid) credentials available, let the user log in.
 		if not self.creds or not self.creds.valid:
 			if self.creds and self.creds.expired and self.creds.refresh_token:
 				self.creds.refresh(Request())
 			else:
-				flow = InstalledAppFlow.from_client_secrets_file(self.config_dir + self.config_data['credentials_file'], self.SCOPES)
+				flow = InstalledAppFlow.from_client_secrets_file(self.credentials_file, self.SCOPES)
 				self.creds = flow.run_console()
 		
 		# Save the credentials for the next run
-		with open(self.config_dir + 'token.pickle', 'wb') as token:
+		with open(self.token_file, 'wb') as token:
 			pickle.dump(self.creds, token)
 
 
