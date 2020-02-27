@@ -264,7 +264,7 @@ class GooglePhotos:
 		while start_date < end_date:
 
 			print("start date: ", start_date, " end date:", start_date + day)
-			self.processed_file_list.append('start date: ' + start_date + '; end date: ' + end_date)
+			self.processed_file_list.append('start date: ' + start_date + '; end date: ' + (start_date + day).isoformat())
 			
 			
 			# Build the filter object, including date range. 
@@ -322,7 +322,7 @@ class GooglePhotos:
 			# Show the list of dates we've returned photos for. 
 			print(results)
 
-			self.processed_file_list.append('new max date: ' + max(results))
+			self.processed_file_list.append('new max date: ' + max(results).isoformat())
 							
 			max_val = max(results)
 			max_val_parts = max_val.split('-')
