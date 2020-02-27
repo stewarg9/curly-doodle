@@ -321,8 +321,6 @@ class GooglePhotos:
 			
 			# Show the list of dates we've returned photos for. 
 			print(results)
-
-			self.processed_file_list.append('new max date: ' + max(results).isoformat())
 							
 			max_val = max(results)
 			max_val_parts = max_val.split('-')
@@ -331,6 +329,8 @@ class GooglePhotos:
 
 			# Update the config file to reflect the "new" sync date.... 
 			self.config_data["last_sync_date"] = max_date.isoformat()
+
+			self.processed_file_list.append('new max date: ' + max_date.isoformat())
 			
 			# Save the last sync date back to the master config file. 
 			with open(self.config_file, "w") as json_data_file:
