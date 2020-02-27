@@ -17,7 +17,7 @@ from datetime import timedelta
 #import pprint
 
 
-class GooglePhotos
+class GooglePhotos:
 
 
 	# This access scope grants read-only access to the authenticated user's Photo Library
@@ -28,22 +28,19 @@ class GooglePhotos
 	CONFIG_DIR = 'config/'
 	CONFIG_FILE = 'app_config.json'
 
-	config_data = None
-
-
 
 	def __init__(self):
 
 		# check for config file... 
-		if not os.path.isfile(CONFIG_DIR + "/app_config.json"):
-			print("Error: config file (" + CONFIG_DIR + "/app_config.json) not found. ")
+		if not os.path.isfile(self.CONFIG_DIR + "/app_config.json"):
+			print("Error: config file (" + self.CONFIG_DIR + "/app_config.json) not found. ")
 			print("creating template config file...")
 			self.create_config_file()
 			exit()
 			
 
 		# Look for the pre-configured search query....
-		with open(CONFIG_DIR + "/app_config.json") as json_data_file:
+		with open(self.CONFIG_DIR + "/app_config.json") as json_data_file:
 			self.config_data = json.load(json_data_file)	
 
 		print("Using config:", self.config_data)		
@@ -56,7 +53,7 @@ class GooglePhotos
 	def get_service(self):
 		""" Validates credentials and returns a service handle"""
 		self.get_credentials()
-		self.service= build(API_SERVICE_NAME, API_VERSION, credentials = self.creds)
+		self.service= build(self.API_SERVICE_NAME, self.API_VERSION, credentials = self.creds)
 		
 
 		
@@ -70,27 +67,27 @@ class GooglePhotos
 
 		self.creds = None
 
-		if os.path.exists(CONFIG_DIR + 'token.pickle'):
-			with open(CONFIG_DIR + 'token.pickle', 'rb') as token:
+		if os.path.exists(self.CONFIG_DIR + 'token.pickle'):
+			with open(self.CONFIG_DIR + 'token.pickle', 'rb') as token:
 				self.creds = pickle.load(token)
 			# If there are no (valid) credentials available, let the user log in.
 		if not self.creds or not self.creds.valid:
 			if self.creds and self.creds.expired and self.creds.refresh_token:
 				self.creds.refresh(Request())
 			else:
-				flow = InstalledAppFlow.from_client_secrets_file(CONFIG_DIR + self.config_data['credentials_file'], SCOPES)
+				flow = InstalledAppFlow.from_client_secrets_file(self.CONFIG_DIR + self.config_data['credentials_file'], SCOPES)
 				self.creds = flow.run_console()
 		
 		# Save the credentials for the next run
-		with open(CONFIG_DIR + 'token.pickle', 'wb') as token:
+		with open(self.CONFIG_DIR + 'token.pickle', 'wb') as token:
 			pickle.dump(self.creds, token)
 
 
 		
 		
-	def download_file(self, service, item_dict):
+	def download_file(self, item_dict):
 
-		#print(self.config_data)
+		print(self.config_data)
 
 		target_dir = self.config_data.get('download_dir')
 		
@@ -281,7 +278,7 @@ class GooglePhotos
 							#print(create_date)
 							
 							results.append(create_date)
-							self.download_file(service, item)	
+							self.download_file(item)	
 
 
 					# Google  API shows our items in multiple pages when the number of files exceed page sizein json file
@@ -317,7 +314,7 @@ class GooglePhotos
 			self.config_data["last_sync_date"] = max_date.isoformat()
 			
 			# Save the last sync date back to the master config file. 
-			with open(CONFIG_DIR + "/app_config.json", "w") as json_data_file:
+			with open(self.CONFIG_DIR + "/app_config.json", "w") as json_data_file:
 				json.dump(self.config_data, json_data_file, indent=4, sort_keys=True)		
 
 
@@ -334,7 +331,7 @@ class GooglePhotos
 		config_data["last_sync_date"] = "2010-01-01"
 		
 		# Save the last sync date back to the master config file. 
-		with open(CONFIG_DIR + "/app_config.json", "w") as json_data_file:
+		with open(self.CONFIG_DIR + "/app_config.json", "w") as json_data_file:
 			json.dump(config_data, json_data_file, indent=4, sort_keys=True)		
 
 
