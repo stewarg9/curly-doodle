@@ -10,6 +10,7 @@ from google.auth.transport.requests import Request
 import shutil
 import json
 
+import argparse
 
 from datetime import date
 from datetime import timedelta
@@ -27,17 +28,18 @@ class GooglePhotos:
 	API_SERVICE_NAME = 'photoslibrary'
 	API_VERSION = 'v1'
 
-	CONFIG_DIR_NAME = 'config'
 	CONFIG_FILE_NAME = 'app_config.json'
 	TOKEN_FILE_NAME = 'token.pickle'
 
 	
 
-	def __init__(self):
+	def __init__(self, user_name):
 
+		self.config_dir_name = "config_" + user_name
+		
 		main_base = os.path.dirname(__file__)
-		self.config_dir = os.path.join(main_base, self.CONFIG_DIR_NAME)
-		self.config_file = os.path.join(main_base, self.CONFIG_DIR_NAME, self.CONFIG_FILE_NAME)	
+		self.config_dir = os.path.join(main_base, self.config_dir_name)
+		self.config_file = os.path.join(main_base, self.config_dir_name, self.CONFIG_FILE_NAME)	
 				
 		# check for config file... 
 		if not os.path.isfile(self.config_file):
@@ -53,8 +55,8 @@ class GooglePhotos:
 
 		print("Using config:", self.config_data)		
 
-		self.token_file = os.path.join(main_base, self.CONFIG_DIR_NAME, self.TOKEN_FILE_NAME)			
-		self.credentials_file = os.path.join(self.config_dir, self.config_data['credentials_file'])		
+		self.token_file = os.path.join(main_base, self.config_dir_name, self.TOKEN_FILE_NAME)			
+		self.credentials_file = os.path.join(self.config_dir_name, self.config_data['credentials_file'])		
 		
 		self.get_service()
 
@@ -364,11 +366,18 @@ class GooglePhotos:
 def main():
 
 
-	photos = GooglePhotos()
+	photos = GooglePhotos(user=user)
 
 	photos.search_date_range()
 
 
 
 if __name__ == '__main__':
-	main()		
+
+	parser = argparse.ArgumentParser()
+
+	parser.add_argument("-u", "--user_name", help="user to extract photos for", default="gareth")
+
+	args = parser.parse_args()   
+	
+	main(args.user_name)		
