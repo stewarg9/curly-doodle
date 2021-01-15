@@ -363,10 +363,10 @@ class GooglePhotos:
 
 
 				
-def main():
+def main(user_name):
 
 
-	photos = GooglePhotos(user=user)
+	photos = GooglePhotos(user_name=user_name)
 
 	photos.search_date_range()
 
