@@ -16,7 +16,7 @@ from datetime import timedelta
 
 #import pprint
 
-from sleepingbunny.GoogleMail import GoogleMail as gm
+from sleepingbunny import GoogleMail as gm
 
 
 class GooglePhotos:
