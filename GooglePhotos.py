@@ -66,7 +66,7 @@ class GooglePhotos:
 	def get_service(self):
 		""" Validates credentials and returns a service handle"""
 		self.get_credentials()
-		self.service= build(self.API_SERVICE_NAME, self.API_VERSION, credentials = self.creds)
+		self.service= build(self.API_SERVICE_NAME, self.API_VERSION, credentials = self.creds, static_discovery=False)
 		
 
 		
